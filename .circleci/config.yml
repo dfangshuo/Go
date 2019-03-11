@@ -23,6 +23,7 @@ jobs:
       - checkout
 
       # specify any bash command here prefixed with `run: `
+      - run: go build main.go
       - run: go get -v -t -d github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME
       - run: go test -v github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME
 
