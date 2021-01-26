@@ -11,6 +11,8 @@ import (
 	"github.com/syndtr/goleveldb/leveldb"
 )
 
+var SEARCH_PREFIXES = [...]string{"wiki", "w", "find", "f"}
+
 // Serve a bundled asset over HTTP.
 func serveAsset(w http.ResponseWriter, r *http.Request, name string) {
 	n, err := AssetInfo(name)
@@ -42,10 +44,24 @@ func templateFromAssetFn(fn func() (*asset, error)) (*template.Template, error) 
 // shortcut redirects and for sending unmapped shortcuts to the edit page.
 func getDefault(ctx *context.Context, w http.ResponseWriter, r *http.Request) {
 	p, s := parseName("/", r.URL.Path)
+
+        // home page: edit screen with any prefix
 	if p == "" {
 		http.Redirect(w, r, "/edit/", http.StatusTemporaryRedirect)
 		return
 	}
+
+        for _, search_prefix := range SEARCH_PREFIXES {
+                if p == search_prefix && s != "" {
+                        potentialRt, err := ctx.Get(s)
+                        if err == nil {
+                                http.Redirect(w, r,
+                                        potentialRt.URL,
+                                        http.StatusTemporaryRedirect)
+                                return
+                        }
+                }
+        }
 
 	rt, err := ctx.Get(p)
 	if err == leveldb.ErrNotFound {
@@ -124,3 +140,4 @@ func ListenAndServe(addr string, admin bool, version string, ctx *context.Contex
 
 	return http.ListenAndServe(addr, mux)
 }
+
