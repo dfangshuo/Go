@@ -9,6 +9,7 @@ RUN apk update \
   && rm -rf /var/cache/apk/* \
   && rm -rf /go/src /go/pkg \
   && mkdir /data
+  && echo
 
 EXPOSE 8067
 
